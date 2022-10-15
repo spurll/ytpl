@@ -29,7 +29,7 @@ def main():
     parser = ArgumentParser(
         description='Downloads the specified file or playlist from YouTube, '
         'extracts the audio, and sets ID3 track numbers based on its '
-        'with a file name beginning with a number.')
+        'playlist index.')
     parser.add_argument("url", nargs='+', help='The URL(s) to download.')
     args = parser.parse_args()
 
