@@ -6,16 +6,27 @@
 
 from argparse import ArgumentParser
 from youtube_dl import YoutubeDL
+from youtube_dl.utils import DownloadError
 
 
-OPTIONS = {
+retries = 20
+playlist_index = 1
+
+
+def track_playlist_index(d):
+    # Keep track of successful downloads to allow resuming in case of error
+    global playlist_index
+    if d['status'] == 'finished':
+        playlist_index += 1
+
+
+options = {
     'outtmpl': '%(playlist_index)s %(title)s.%(ext)s',
     'outtmpl_na_placeholder': '0',
     'format': 'bestaudio/best',
     'writethumbnail': True,
     'continuedl': True,
-    'retries': 100,
-    'sleep_interval': 2,
+    'progress_hooks': [track_playlist_index],
     'postprocessors': [
         {'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3'},
         {'key': 'FFmpegMetadata'},
@@ -33,8 +44,19 @@ def main():
     parser.add_argument("url", nargs='+', help='The URL(s) to download.')
     args = parser.parse_args()
 
-    with YoutubeDL(OPTIONS) as ytdl:
-        ytdl.download(args.url)
+    global retries
+    success = False
+
+    while not success and retries >= 0:
+        try:
+            with YoutubeDL(options) as ytdl:
+                ytdl.download(args.url)
+                success = True
+        except DownloadError:
+            # Attempt to resume after the last successful download
+            print(f'Download failed. Retrying {retries} more times.')
+            retries -= 1
+            options['playliststart'] = playlist_index
 
 
 if __name__ == "__main__":
