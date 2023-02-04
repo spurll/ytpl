@@ -7,10 +7,14 @@
 from argparse import ArgumentParser
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import DownloadError
+import os.path as path
 
 
 retries = 20
 playlist_index = 1
+
+# Allow age-restricted videos (cookies.txt must be in the script directory)
+cookies = path.join(path.dirname(path.realpath(__file__)), 'cookies.txt')
 
 
 def track_playlist_index(d):
@@ -26,6 +30,7 @@ options = {
     'format': 'bestaudio/best',
     'writethumbnail': True,
     'continuedl': True,
+    'cookiefile': cookies if path.isfile(cookies) else None,
     'progress_hooks': [track_playlist_index],
     'postprocessors': [
         {'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3'},
