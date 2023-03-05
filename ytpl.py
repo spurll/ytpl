@@ -59,10 +59,6 @@ def main():
     playlist_index = args.start
     options['playliststart'] = playlist_index
 
-    print(args.start)
-    print(playlist_index)
-    print(options['playliststart'])
-
     while not success and retries >= 0:
         try:
             with YoutubeDL(options) as ytdl:
