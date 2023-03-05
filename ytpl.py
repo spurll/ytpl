@@ -5,8 +5,10 @@
 
 
 from argparse import ArgumentParser
-from youtube_dl import YoutubeDL
-from youtube_dl.utils import DownloadError
+# from youtube_dl import YoutubeDL
+# from youtube_dl.utils import DownloadError
+from yt_dlp import YoutubeDL
+from yt_dlp.utils import DownloadError
 import os.path as path
 
 
@@ -46,11 +48,20 @@ def main():
         description='Downloads the specified file or playlist from YouTube, '
         'extracts the audio, and sets ID3 track numbers based on its '
         'playlist index.')
-    parser.add_argument("url", nargs='+', help='The URL(s) to download.')
+    parser.add_argument('url', nargs='+', help='The URL(s) to download.')
+    parser.add_argument('-s', '--start', nargs='?', help='The playlist index '
+        'at which to begin downloading. Defaults to 1.', type=int, default=1)
     args = parser.parse_args()
 
     global retries
+    global playlist_index
     success = False
+    playlist_index = args.start
+    options['playliststart'] = playlist_index
+
+    print(args.start)
+    print(playlist_index)
+    print(options['playliststart'])
 
     while not success and retries >= 0:
         try:
