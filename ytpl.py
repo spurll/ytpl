@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 # Written by Gem Newman. This work is licenced under the MIT License.
-# Requires that github.com/spurll/tracknum is installed and available on path.
+# Requires that both github.com/spurll/tracknum and github.com/spurll/normalize
+# are installed and available on path.
 
 
 from argparse import ArgumentParser
@@ -14,9 +15,10 @@ import os.path as path
 
 retries = 20
 playlist_index = 1
+current_path = path.dirname(path.realpath(__file__))
 
 # Allow age-restricted videos (cookies.txt must be in the script directory)
-cookies = path.join(path.dirname(path.realpath(__file__)), 'cookies.txt')
+cookies = path.join(current_path, 'cookies.txt')
 
 
 def track_playlist_index(d):
@@ -38,7 +40,8 @@ options = {
         {'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3'},
         {'key': 'FFmpegMetadata'},
         {'key': 'EmbedThumbnail'},
-        {'key': 'ExecAfterDownload', 'exec_cmd': 'tracknum -f {}'}
+        {'key': 'ExecAfterDownload', 'exec_cmd': 'tracknum -f {}'},
+        {'key': 'ExecAfterDownload', 'exec_cmd': 'normalize {} -v'}
     ]
 }
 
@@ -46,8 +49,8 @@ options = {
 def main():
     parser = ArgumentParser(
         description='Downloads the specified file or playlist from YouTube, '
-        'extracts the audio, and sets ID3 track numbers based on its '
-        'playlist index.')
+        'extracts the audio, performs peak normalization, and sets ID3 track '
+        'numbers based on its playlist index.')
     parser.add_argument('url', nargs='+', help='The URL(s) to download.')
     parser.add_argument('-s', '--start', nargs='?', help='The playlist index '
         'at which to begin downloading. Defaults to 1.', type=int, default=1)
@@ -59,6 +62,7 @@ def main():
     playlist_index = args.start
     options['playliststart'] = playlist_index
 
+    # Download files
     while not success and retries >= 0:
         try:
             with YoutubeDL(options) as ytdl:
