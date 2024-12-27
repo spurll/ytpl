@@ -54,13 +54,17 @@ def main():
     parser.add_argument('url', nargs='+', help='The URL(s) to download.')
     parser.add_argument('-s', '--start', nargs='?', help='The playlist index '
         'at which to begin downloading. Defaults to 1.', type=int, default=1)
+    parser.add_argument('-e', '--end', nargs='?', help='The playlist index '
+        'of the last track to download. Defaults to playlist end.', type=int,
+        default=None)
     args = parser.parse_args()
 
     global retries
     global playlist_index
     success = False
+    options['playliststart'] = args.start
+    options['playlistend'] = args.end
     playlist_index = args.start
-    options['playliststart'] = playlist_index
 
     # Download files
     while not success and retries >= 0:
